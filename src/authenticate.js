@@ -1,0 +1,106 @@
+import React from "react";
+import "./authenticate.css";
+import firebase from "firebase";
+
+
+//=============Firebase init======================/
+
+var config = {
+    apiKey: "AIzaSyAr0Ckw0-j9KMfydGNDGd_qHor7GEUO288",
+    authDomain: "surveyfirebase-51d78.firebaseapp.com",
+    databaseURL: "https://surveyfirebase-51d78.firebaseio.com",
+    projectId: "surveyfirebase-51d78",
+    storageBucket: "surveyfirebase-51d78.appspot.com",
+    messagingSenderId: "871507352234"
+  };
+  firebase.initializeApp(config);
+  
+//===============end firebase init=====================//
+
+class Auth extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+            username:"",
+            password:"",
+            err:""
+        }
+        this.handleChange=this.handleChange.bind(this);
+        this.login=this.login.bind(this);
+        this.signUp=this.signUp.bind(this);
+    }
+    
+    handleChange(e){
+        //alert(e.target.value);
+        //this.setState({username:e.target.value});
+        this.setState({ [e.target.name]: e.target.value });
+    }
+    
+    login(){
+       const email=this.state.username;
+       const passwd=this.state.password;
+       //alert(email+" "+passwd);
+       const auth=firebase.auth();
+       const promise= auth.signInWithEmailAndPassword(email,passwd);
+       
+       promise.catch(e=>{
+           var error=e.message;
+           alert(error);
+           this.setState({err:error});
+           
+       });
+    }
+    
+    signUp(){
+        const email = this.state.username;
+        const passwd = this.state.password;
+        //alert(email+" "+passwd);
+        const auth = firebase.auth();
+        const promise=auth.createUserWithEmailAndPassword(email,passwd);
+        
+        promise
+        .then(user=>{
+           var error="Welcome " + user.email;
+           firebase.database().ref("users/"+user.uid).set({
+               email:user.email
+           });
+           console.log(user);
+           this.setState({err:error});
+        });
+        
+        promise
+        .catch(e=>{
+           var error=e.message;
+           alert(error);
+           this.setState({err:error});
+        });
+    }
+    
+    render(){
+        return (
+                <div className="wrapper">
+                  
+                
+                  <div className="container">
+                    <label for="uname"><b>Username</b></label>
+                    <input id="email" type="text" placeholder="Enter email" name="username" onChange={this.handleChange} />
+                
+                    <label for="psw"><b>Password</b></label>
+                    <input id="password" type="password" placeholder="Enter Password" name="password" onChange={this.handleChange}/>
+                        
+                    <button type="submit" onClick={this.login}>Login</button>
+                    <p>{this.state.err}</p>
+                    
+                  </div>
+                
+                  <div className="container" >
+                    <button onClick={this.signUp} type="button" className="cancelbtn">Sign Up</button>
+                    <button type="button" className="logoutbtn">Log Out</button>
+                    
+                  </div>
+                </div>
+            );
+    }
+}
+
+export default Auth;
