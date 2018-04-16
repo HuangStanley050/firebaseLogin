@@ -12,73 +12,91 @@ var config = {
     projectId: "surveyfirebase-51d78",
     storageBucket: "surveyfirebase-51d78.appspot.com",
     messagingSenderId: "871507352234"
-  };
-  firebase.initializeApp(config);
-  
+};
+firebase.initializeApp(config);
+
 //===============end firebase init=====================//
 
-class Auth extends React.Component{
-    constructor(props){
+class Auth extends React.Component {
+    constructor(props) {
         super(props);
-        this.state={
-            username:"",
-            password:"",
-            err:""
+        this.state = {
+            username: "",
+            password: "",
+            err: ""
         }
-        this.handleChange=this.handleChange.bind(this);
-        this.login=this.login.bind(this);
-        this.signUp=this.signUp.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+        this.login = this.login.bind(this);
+        this.signUp = this.signUp.bind(this);
+        this.logOut = this.logOut.bind(this);
     }
-    
-    handleChange(e){
+
+    handleChange(e) {
         //alert(e.target.value);
         //this.setState({username:e.target.value});
-        this.setState({ [e.target.name]: e.target.value });
+        this.setState({
+            [e.target.name]: e.target.value });
     }
-    
-    login(){
-       const email=this.state.username;
-       const passwd=this.state.password;
-       //alert(email+" "+passwd);
-       const auth=firebase.auth();
-       const promise= auth.signInWithEmailAndPassword(email,passwd);
-       
-       promise.catch(e=>{
-           var error=e.message;
-           alert(error);
-           this.setState({err:error});
-           
-       });
-    }
-    
-    signUp(){
+
+    login() {
         const email = this.state.username;
         const passwd = this.state.password;
         //alert(email+" "+passwd);
         const auth = firebase.auth();
-        const promise=auth.createUserWithEmailAndPassword(email,passwd);
-        
-        promise
-        .then(user=>{
-           var error="Welcome " + user.email;
-           firebase.database().ref("users/"+user.uid).set({
-               email:user.email
-           });
-           console.log(user);
-           this.setState({err:error});
+        const promise = auth.signInWithEmailAndPassword(email, passwd);
+
+        promise.then(user => {
+            var logout = document.getElementById("logout");
+            this.setState({ err: "Welcome " + user.email });
+            logout.classList.remove("hide");
+
         });
-        
-        promise
-        .catch(e=>{
-           var error=e.message;
-           alert(error);
-           this.setState({err:error});
+
+        promise.catch(e => {
+            var error = e.message;
+            alert(error);
+            this.setState({ err: error });
+
         });
     }
-    
-    render(){
+
+    signUp() {
+        const email = this.state.username;
+        const passwd = this.state.password;
+        //alert(email+" "+passwd);
+        const auth = firebase.auth();
+        const promise = auth.createUserWithEmailAndPassword(email, passwd);
+
+        promise
+            .then(user => {
+                var error = "Welcome " + user.email;
+                firebase.database().ref("users/" + user.uid).set({
+                    email: user.email
+                });
+                console.log(user);
+                this.setState({ err: error });
+            });
+
+        promise
+            .catch(e => {
+                var error = e.message;
+                alert(error);
+                this.setState({ err: error });
+            });
+    }
+
+    logOut() {
+        firebase.auth().signOut();
+        var logout=document.getElementById("logout");
+        var msg="Logged out, thank you";
+        this.setState({err:msg});
+        logout.classList.add("hide");
+
+    }
+
+    render() {
         return (
-                <div className="wrapper">
+            <div className="wrapper">
                   
                 
                   <div className="container">
@@ -95,11 +113,11 @@ class Auth extends React.Component{
                 
                   <div className="container" >
                     <button onClick={this.signUp} type="button" className="cancelbtn">Sign Up</button>
-                    <button type="button" className="logoutbtn">Log Out</button>
+                    <button onClick={this.logOut} id="logout" type="button" className="logoutbtn hide">Log Out</button>
                     
                   </div>
                 </div>
-            );
+        );
     }
 }
 
