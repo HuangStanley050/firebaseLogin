@@ -29,6 +29,7 @@ class Auth extends React.Component {
         this.login = this.login.bind(this);
         this.signUp = this.signUp.bind(this);
         this.logOut = this.logOut.bind(this);
+        this.google=this.google.bind(this);
     }
 
     handleChange(e) {
@@ -73,7 +74,7 @@ class Auth extends React.Component {
                 firebase.database().ref("users/" + user.uid).set({
                     email: user.email
                 });
-                console.log(user);
+                //console.log(user);
                 this.setState({ err: error });
             });
 
@@ -92,6 +93,27 @@ class Auth extends React.Component {
         this.setState({err:msg});
         logout.classList.add("hide");
 
+    }
+    google(){
+        var provider=new firebase.auth.GoogleAuthProvider();
+        var promise=firebase.auth().signInWithPopup(provider);
+        
+        promise.then(result=>{
+            var logout=document.getElementById("logout");
+            logout.classList.remove("hide");
+            var user=result.user;
+            firebase.database().ref("users/"+user.uid).set({
+                email:user.email,
+                name:user.displayName
+            });
+            this.setState({err:"Welcome "+user.displayName});
+        });
+        
+        promise.catch(e=>{
+            var msg=e.message;
+            this.setState({err:msg});
+        });
+        
     }
 
     render() {
@@ -113,6 +135,8 @@ class Auth extends React.Component {
                 
                   <div className="container" >
                     <button onClick={this.signUp} type="button" className="cancelbtn">Sign Up</button>
+                     <button onClick={this.google} type="button" className="google">Sign in with Google</button>
+                    
                     <button onClick={this.logOut} id="logout" type="button" className="logoutbtn hide">Log Out</button>
                     
                   </div>
